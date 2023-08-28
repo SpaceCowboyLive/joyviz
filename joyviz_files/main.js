@@ -116,7 +116,8 @@ function show_joysticks_dialog() {
     }
 
     function update_info() {
-        var joys = navigator.getGamepads();
+        var joys = navigator.getGamepads()
+            .sort((a, b) => compareJoysticksNames(a?.id, b?.id));
         for (var i = 0; i < 4; ++i) {
             update_joy(joys[i], $t.id('joyinfo' + i));
         }
@@ -124,6 +125,50 @@ function show_joysticks_dialog() {
     }
 
     requestAnimationFrame(update_info);
+}
+
+function isControllerName(j) {
+    return j && j.startsWith('Wireless Controller')
+}
+
+function sortableJoysticksName(j) {
+    if(j === null || j === undefined || !j) {
+        return j
+    }
+
+    return j
+}
+
+
+function objCompare( a, b ) {
+    if(a === b) {
+        return 0
+    }
+    if(a === null || a === undefined) {
+        return -1
+    }
+    if(b === null || b === undefined) {
+        return 1
+    }
+    if ( a < b ){
+        return -1;
+    }
+    if ( a > b ){
+        return 1;
+    }
+    return 0;
+}
+
+function compareJoysticksNames(a, b) {
+    if(isControllerName(a) && !isControllerName(b)) {
+        return 1
+    }
+    if(isControllerName(b) && !isControllerName(a)) {
+        return -1
+    }
+    const na = sortableJoysticksName(a)
+    const nb = sortableJoysticksName(b)
+    return objCompare(na, nb)
 }
 
 function show_widget_properties_dialog(widget) {
@@ -887,7 +932,8 @@ function deserialize(str, container) {
 }
 
 function auto_update() {
-    var joys = navigator.getGamepads();
+    var joys = navigator.getGamepads()
+        .sort((a, b) => compareJoysticksNames(a?.id, b?.id));
 
     function get_axis_data(addr) {
         try { return joys[addr[0] - 1].axes[addr[1] - 1]; }
